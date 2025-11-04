@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini Blogger — Demo</title>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --accent:#2563eb;
+      --radius:12px;
+      --shadow: 0 6px 18px rgba(20,20,30,0.06);
+      --shadow-lg: 0 10px 25px rgba(20,20,30,0.1);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: linear-gradient(rgba(245, 247, 251, 0.85), rgba(245, 247, 251, 0.9)), 
+                  url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color:#0f172a;
+      padding:20px;
+      min-height: 100vh;
+    }
+    header{
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      max-width:1100px;
+      margin:0 auto 20px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#60a5fa,#7c3aed);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;
+      box-shadow:var(--shadow);
+    }
+    .title{font-size:20px;font-weight:700}
+    .subtitle{font-size:12px;color:var(--muted);margin-top:2px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .nav-links {display:flex;gap:16px;margin:0 20px}
+    .nav-link {
+      padding: 8px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--muted);
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn{
+      border:none;padding:8px 12px;border-radius:10px;background:var(--card);cursor:pointer;
+      box-shadow: var(--shadow);display:inline-flex;align-items:center;gap:8px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+    .btn.primary{background:var(--accent);color:white}
+    .container{
+      max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:20px;
+    }
+
+    /* Page sections */
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+
+    /* Editor card */
+    .card{
+      background:var(--card);padding:18px;border-radius:var(--radius);box-shadow:var(--shadow);
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+    .form-row{display:flex;gap:8px;margin-bottom:10px}
+    input[type="text"], select, textarea{
+      width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:#fbfdff;
+      font-size:14px;resize:vertical;
+      transition: all 0.2s ease;
+    }
+    input[type="text"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    label.small{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+
+    .editor-toolbar{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .posts-list{display:flex;flex-direction:column;gap:12px}
+    .post-item{padding:12px;border-radius:10px;border:1px solid #eef2ff;background:linear-gradient(180deg,#fff,#fbfdff);transition: all 0.2s ease}
+    .post-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .post-item h3{margin:0 0 6px 0}
+    .meta{font-size:12px;color:var(--muted)}
+    .post-actions{display:flex;gap:8px;margin-top:8px}
+    .preview{padding:12px;border-radius:10px;background:#fbfdff;border:1px dashed #e6eefb}
+
+    /* right column */
+    .sidebar-section{margin-bottom:16px}
+    .tag{display:inline-block;padding:6px 8px;border-radius:999px;background:#eef2ff;margin:6px 6px 0 0;font-size:12px;color:#1e3a8a;transition: all 0.2s ease}
+    .tag:hover {
+      background: #e0e7ff;
+      transform: translateY(-1px);
+    }
+    .small-muted{font-size:13px;color:var(--muted)}
+
+    /* post page */
+    .post-content img{max-width:100%;height:auto;border-radius:8px;margin:8px 0}
+    .comments {margin-top:12px}
+    .comment {padding:10px;border-radius:8px;background:#fbfbff;border:1px solid #eef2ff;margin-bottom:8px}
+
+    /* About page */
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .team-member {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .team-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #60a5fa, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .stat-card {
+      background: var(--card);
+      padding: 16px;
+      border-radius: var(--radius);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--accent);
+    }
+
+    /* Contact page */
+    .contact-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+    .contact-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    /* mobile */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr; padding-bottom:60px}
+      .controls{flex-wrap:wrap}
+      .nav-links {display: none;}
+      .about-content, .contact-form, .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .page.active {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    /* Dark mode toggle */
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">MB</div>
+    <div>
+      <div class="title">Mini Blogger</div>
+      <div class="subtitle">Demo blogging platform (local only)</div>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#" class="nav-link active" data-page="home">Home</a>
+    <a href="#" class="nav-link" data-page="about">About</a>
+    <a href="#" class="nav-link" data-page="contact">Contact</a>
+  </nav>
+
+  <div class="controls">
+    <button class="theme-toggle" id="themeToggle">🌙</button>
+    <button class="btn" id="exportBtn" title="Export all posts">Export JSON</button>
+    <input id="importFile" type="file" accept="application/json" style="display:none"/>
+    <button class="btn" id="importBtn">Import JSON</button>
+    <button class="btn" id="adminBtn">Admin</button>
+  </div>
+</header>
+
+<main class="container">
+  <!-- Home Page -->
+  <section class="page active" id="home-page">
+    <!-- left: editor + posts -->
+    <section>
+      <div class="card" id="editorCard">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div>
+            <strong id="editorTitle">Create New Post</strong>
+            <div class="small-muted">Write something valuable — hits are imaginary in this demo 😉</div>
+          </div>
+          <div class="small-muted" id="statusInfo"></div>
+        </div>
+
+        <div>
+          <label class="small">Title</label>
+          <input id="postTitle" type="text" placeholder="Post title">
+
+          <div class="form-row">
+            <div style="flex:1">
+              <label class="small">Tags (comma separated)</label>
+              <input id="postTags" type="text" placeholder="e.g. webdev, javascript">
+            </div>
+            <div style="width:160px">
+              <label class="small">Category</label>
+              <input id="postCategory" type="text" placeholder="e.g. Tutorial">
+            </div>
+          </div>
+
+          <label class="small">Feature Image (optional)</label>
+          <input id="postImage" type="file" accept="image/*">
+
+          <label class="small" style="margin-top:8px">Content (supports simple markdown-like formatting)</label>
+          <div class="editor-toolbar">
+            <button class="btn" id="mdBold" title="Wrap selection with **">Bold</button>
+            <button class="btn" id="mdItalic" title="Wrap selection with *">Italic</button>
+            <button class="btn" id="mdH1" title="Insert # Heading">H1</button>
+            <button class="btn" id="mdH2" title="Insert ## Heading">H2</button>
+            <button class="btn" id="previewToggle">Toggle Preview</button>
+          </div>
+          <textarea id="postContent" rows="10" placeholder="Write your post here..."></textarea>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn primary" id="publishBtn">Publish</button>
+            <button class="btn" id="saveDraftBtn">Save Draft</button>
+            <button class="btn" id="clearBtn">Clear</button>
+          </div>
+        </div>
+        <div id="previewArea" style="margin-top:12px;display:none">
+          <div class="preview" id="previewContent">Preview will appear here</div>
+        </div>
+      </div>
+
+      <!-- posts list -->
+      <div class="card" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div><strong>Posts</strong> <span class="small-muted" id="postsCount"></span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="searchInput" type="text" placeholder="Search posts..." style="padding:8px;border-radius:8px;border:1px solid #e6e9ef">
+            <select id="sortSelect" style="padding:8px;border-radius:8px;border:1px solid #e6e9ef">
+              <option value="new">Newest</option>
+              <option value="old">Oldest</option>
+              <option value="title">Title A→Z</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="postsList" class="posts-list"></div>
+
+        <div style="display:flex;justify-content:center;margin-top:10px">
+          <button class="btn" id="prevPage">Prev</button>
+          <div style="width:12px"></div>
+          <button class="btn" id="nextPage">Next</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- right: sidebar -->
+    <aside>
+      <div class="card sidebar-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div><strong>Filters</strong></div>
+          <div class="small-muted"><span id="filterActive">All</span></div>
+        </div>
+
+        <div style="margin-bottom:8px">
+          <label class="small">Filter by tag</label>
+          <div id="tagsCloud"></div>
+        </div>
+
+        <div style="margin-bottom:8px">
+          <label class="small">Filter by category</label>
+          <div id="categoriesList"></div>
+        </div>
+
+        <div style="margin-top:8px">
+          <label class="small">Admin</label>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <input id="adminPass" type="password" placeholder="Admin password" style="padding:8px;border-radius:8px;border:1px solid #e6e9ef">
+            <button class="btn" id="loginBtn">Login</button>
+          </div>
+          <div id="adminStatus" class="small-muted" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <div class="card sidebar-section">
+        <strong>About this demo</strong>
+        <p class="small-muted" style="margin-top:8px;font-size:13px">
+          This is a client-side demo: data is stored in your browser (<code>localStorage</code>). It's not secure for production.
+        </p>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button class="btn" id="clearAll">Clear all data</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>Quick help</strong>
+        <ul style="padding-left:18px;margin-top:8px;color:var(--muted)">
+          <li>Write posts and click Publish.</li>
+          <li>Use image upload to add a feature image.</li>
+          <li>Export JSON to backup; import to restore.</li>
+        </ul>
+      </div>
+    </aside>
+  </section>
+
+  <!-- About Page -->
+  <section class="page" id="about-page">
+    <div class="card">
+      <h2 style="margin-top:0">About Mini Blogger</h2>
+      <p>Mini Blogger is a lightweight, client-side blogging platform designed for simplicity and ease of use. All your content is stored locally in your browser, giving you complete control over your data.</p>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="totalPosts">0</div>
+          <div class="small-muted">Total Posts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalComments">0</div>
+          <div class="small-muted">Total Comments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalTags">0</div>
+          <div class="small-muted">Unique Tags</div>
+        </div>
+      </div>
+
+      <h3>Features</h3>
+      <ul>
+        <li>Create and edit blog posts with a simple editor</li>
+        <li>Markdown-like formatting support</li>
+        <li>Image upload and management</li>
+        <li>Tag and categorize your content</li>
+        <li>Comment system for reader engagement</li>
+        <li>Export and import your data</li>
+        <li>Responsive design for all devices</li>
+      </ul>
+
+      <h3>Our Team</h3>
+      <div class="about-content">
+        <div class="team-member">
+          <div class="team-avatar">JD</div>
+          <div>
+            <strong>John Doe</strong>
+            <div class="small-muted">Lead Developer</div>
+          </div>
+        </div>
+        <div class="team-member">
+          <div class="team-avatar">AS</div>
+          <div>
+            <strong>Alice Smith</strong>
+            <div class="small-muted">UI/UX Designer</div>
+          </div>
+        </div>
+        <div class="team-member">
+          <div class="team-avatar">BJ</div>
+          <div>
+            <strong>Bob Johnson</strong>
+            <div class="small-muted">Content Strategist</div>
+          </div>
+        </div>
+        <div class="team-member">
+          <div class="team-avatar">CW</div>
+          <div>
+            <strong>Carol White</strong>
+            <div class="small-muted">Community Manager</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Page -->
+  <section class="page" id="contact-page">
+    <div class="card">
+      <h2 style="margin-top:0">Contact Us</h2>
+      <p>We'd love to hear from you! Send us a message using the form below or reach out through our other channels.</p>
+      
+      <div class="contact-form">
+        <div>
+          <label class="small">Your Name</label>
+          <input type="text" id="contactName" placeholder="Enter your name" style="margin-bottom:12px">
+          
+          <label class="small">Email Address</label>
+          <input type="text" id="contactEmail" placeholder="Enter your email" style="margin-bottom:12px">
+          
+          <label class="small">Subject</label>
+          <input type="text" id="contactSubject" placeholder="What is this about?" style="margin-bottom:12px">
+          
+          <label class="small">Message</label>
+          <textarea id="contactMessage" rows="6" placeholder="Type your message here..."></textarea>
+          
+          <button class="btn primary" id="sendMessageBtn" style="margin-top:12px">Send Message</button>
+        </div>
+        
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div>
+              <strong>Our Location</strong>
+              <div class="small-muted">123 Blog Street, Digital City</div>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">📧</div>
+            <div>
+              <strong>Email Us</strong>
+              <div class="small-muted">hello@miniblogger.demo</div>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div>
+              <strong>Call Us</strong>
+              <div class="small-muted">+1 (555) 123-4567</div>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">🕒</div>
+            <div>
+              <strong>Business Hours</strong>
+              <div class="small-muted">Mon-Fri: 9AM-6PM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Post view modal (simple) -->
+<div id="modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(6,6,7,0.45);padding:20px;z-index:1000">
+  <div style="width:100%;max-width:880px;background:var(--card);border-radius:12px;padding:18px;box-shadow:var(--shadow);max-height:90vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h2 id="modalTitle" style="margin:0">Post title</h2>
+        <div class="meta" id="modalMeta">date • category • tags</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="modalEdit">Edit</button>
+        <button class="btn" id="modalClose">Close</button>
+      </div>
+    </div>
+    <hr style="margin:12px 0;border:none;border-top:1px solid #eef2ff">
+    <div id="modalImage" style="margin-bottom:12px"></div>
+    <article id="modalContent" class="post-content" style="line-height:1.65"></article>
+
+    <section class="comments" id="modalComments">
+      <h3 style="margin-top:18px">Comments</h3>
+      <div id="commentsList" style="margin-top:8px"></div>
+
+      <div style="margin-top:10px">
+        <input id="commentAuthor" type="text" placeholder="Your name" style="padding:8px;border-radius:6px;border:1px solid #e6e9ef;width:40%;margin-right:8px">
+        <input id="commentEmail" type="text" placeholder="Email (optional)" style="padding:8px;border-radius:6px;border:1px solid #e6e9ef;width:40%;margin-right:8px">
+        <button class="btn" id="addCommentBtn">Add Comment</button>
+        <div style="margin-top:8px">
+          <textarea id="commentText" rows="3" placeholder="Write your comment..." style="width:100%;padding:8px;border-radius:6px;border:1px solid #e6e9ef;margin-top:8px"></textarea>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+/**********************************************************************
+ * Mini Blogger — client-side demo
+ * Storage: localStorage key "miniBlogger.posts" and "miniBlogger.admin"
+ * Author: demo code
+ **********************************************************************/
+
+/* Utility helpers */
+const $ = id => document.getElementById(id);
+const saveToLS = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const loadFromLS = (k, fallback) => {
+  try { const v = JSON.parse(localStorage.getItem(k)); return v === null ? fallback : v; }
+  catch(e){ return fallback; }
+};
+
+/* Data model */
+const LS_KEY = "miniBlogger.posts";
+const LS_ADMIN = "miniBlogger.admin";
+const LS_CONTACTS = "miniBlogger.contacts";
+
+let posts = loadFromLS(LS_KEY, []); // array of {id,title,content,tags,category,image(base64),date,draft,comments:[]}
+let admin = loadFromLS(LS_ADMIN, {logged:false,pass:null}); // simplistic
+let contacts = loadFromLS(LS_CONTACTS, []); // contact form submissions
+let currentEditId = null;
+let perPage = 5;
+let currentPage = 1;
+let currentFilter = {tag:null,category:null,search:"",sort:"new"};
+
+/* DOM nodes */
+const postTitle = $("postTitle");
+const postContent = $("postContent");
+const postTags = $("postTags");
+const postCategory = $("postCategory");
+const postImage = $("postImage");
+const publishBtn = $("publishBtn");
+const saveDraftBtn = $("saveDraftBtn");
+const clearBtn = $("clearBtn");
+const postsList = $("postsList");
+const postsCount = $("postsCount");
+const searchInput = $("searchInput");
+const sortSelect = $("sortSelect");
+const tagsCloud = $("tagsCloud");
+const categoriesList = $("categoriesList");
+const prevPageBtn = $("prevPage");
+const nextPageBtn = $("nextPage");
+const previewToggle = $("previewToggle");
+const previewArea = $("previewArea");
+const previewContent = $("previewContent");
+const adminBtn = $("adminBtn");
+const adminPass = $("adminPass");
+const loginBtn = $("loginBtn");
+const adminStatus = $("adminStatus");
+const exportBtn = $("exportBtn");
+const importBtn = $("importBtn");
+const importFile = $("importFile");
+const clearAllBtn = $("clearAll");
+const statusInfo = $("statusInfo");
+const themeToggle = $("themeToggle");
+
+// About page elements
+const totalPosts = $("totalPosts");
+const totalComments = $("totalComments");
+const totalTags = $("totalTags");
+
+// Contact page elements
+const contactName = $("contactName");
+const contactEmail = $("contactEmail");
+const contactSubject = $("contactSubject");
+const contactMessage = $("contactMessage");
+const sendMessageBtn = $("sendMessageBtn");
+
+/* Modal nodes */
+const modal = $("modal");
+const modalTitle = $("modalTitle");
+const modalMeta = $("modalMeta");
+const modalContent = $("modalContent");
+const modalImage = $("modalImage");
+const modalClose = $("modalClose");
+const modalEdit = $("modalEdit");
+const commentsList = $("commentsList");
+const commentAuthor = $("commentAuthor");
+const commentEmail = $("commentEmail");
+const commentText = $("commentText");
+const addCommentBtn = $("addCommentBtn");
+
+/* Markdown-ish renderer (simple) */
+function renderMarkdown(text){
+  // escape HTML
+  const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  text = esc(text || "");
+
+  // convert code blocks ```...``` (simple)
+  text = text.replace(/```([\s\S]*?)```/g, (m, code) => `<pre style="background:#0f172a;color:#fff;padding:10px;border-radius:6px;overflow:auto">${code.replace(/&/g,"&amp;")}</pre>`);
+
+  // headings
+  text = text.replace(/^# (.*$)/gm, "<h1>$1</h1>");
+  text = text.replace(/^## (.*$)/gm, "<h2>$1</h2>");
+  text = text.replace(/^### (.*$)/gm, "<h3>$1</h3>");
+
+  // bold **text**
+  text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  // italic *text*
+  text = text.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  // links [text](url)
+  text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  // line breaks to paragraphs
+  const paragraphs = text.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`).join("");
+  return paragraphs;
+}
+
+/* ID generator */
+function uid(prefix="p") {
+  return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+}
+
+/* Save & load */
+function persist(){
+  saveToLS(LS_KEY, posts);
+  statusInfo.textContent = `Saved ${new Date().toLocaleTimeString()}`;
+}
+
+/* UI: build posts listing based on filters */
+function getFilteredSorted(){
+  let list = posts.filter(p => !p.deleted && !p.draft);
+  // search
+  const q = currentFilter.search.trim().toLowerCase();
+  if(q) list = list.filter(p => (p.title + " " + p.content + " " + (p.tags||'') + " " + (p.category||'')).toLowerCase().includes(q));
+  // tag filter
+  if(currentFilter.tag) list = list.filter(p => (p.tags||[]).includes(currentFilter.tag));
+  if(currentFilter.category) list = list.filter(p => p.category === currentFilter.category);
+  // sort
+  if(currentFilter.sort === "new") list.sort((a,b)=> new Date(b.date) - new Date(a.date));
+  else if(currentFilter.sort === "old") list.sort((a,b)=> new Date(a.date) - new Date(b.date));
+  else if(currentFilter.sort === "title") list.sort((a,b)=> a.title.localeCompare(b.title));
+  return list;
+}
+
+function renderPosts(){
+  const list = getFilteredSorted();
+  postsCount.textContent = `(${list.length})`;
+  // pagination
+  const totalPages = Math.max(1, Math.ceil(list.length / perPage));
+  if(currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage-1)*perPage;
+  const pageItems = list.slice(start, start+perPage);
+
+  postsList.innerHTML = "";
+  if(pageItems.length === 0){
+    postsList.innerHTML = `<div class="small-muted">No posts found. Create your first post!</div>`;
+  } else {
+    pageItems.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "post-item";
+      const tagsHtml = (p.tags || []).map(t => `<span class="tag">${t}</span>`).join(" ");
+      div.innerHTML = `
+        <h3>${escapeHtml(p.title || "(Untitled)")}</h3>
+        <div class="meta">${new Date(p.date).toLocaleString()} • ${p.category || "Uncategorized"}</div>
+        <div style="margin-top:8px">${(p.excerpt || createExcerpt(p.content || ""))}</div>
+        <div style="margin-top:8px">${tagsHtml}</div>
+        <div class="post-actions">
+          <button class="btn" data-id="${p.id}" data-action="view">View</button>
+          <button class="btn" data-id="${p.id}" data-action="edit">Edit</button>
+          <button class="btn" data-id="${p.id}" data-action="delete">Delete</button>
+        </div>
+      `;
+      postsList.appendChild(div);
+    });
+  }
+  // page buttons enable/disable
+  prevPageBtn.disabled = currentPage <= 1;
+  nextPageBtn.disabled = currentPage >= totalPages;
+  // refresh side filters
+  renderTagsAndCategories();
+  updateAboutStats();
+}
+
+/* create small excerpt */
+function createExcerpt(md){
+  const stripped = md.replace(/[#*_`\[\]\(\)]/g, "");
+  return stripped.length > 200 ? stripped.slice(0,200) + "..." : stripped;
+}
+
+/* escape for html title */
+function escapeHtml(s){ return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* render tags cloud and categories */
+function renderTagsAndCategories(){
+  const tagCounts = {};
+  const catCounts = {};
+  posts.forEach(p => {
+    (p.tags||[]).forEach(t => tagCounts[t] = (tagCounts[t]||0) + 1);
+    if(p.category) catCounts[p.category] = (catCounts[p.category]||0) + 1;
+  });
+
+  tagsCloud.innerHTML = "";
+  Object.keys(tagCounts).sort().forEach(t => {
+    const el = document.createElement("button");
+    el.className = "tag";
+    el.textContent = `${t} (${tagCounts[t]})`;
+    el.onclick = () => { currentFilter.tag = currentFilter.tag === t ? null : t; updateFilterUI(); renderPosts(); };
+    tagsCloud.appendChild(el);
+  });
+  categoriesList.innerHTML = "";
+  Object.keys(catCounts).sort().forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.style.fontSize = "13px";
+    btn.textContent = `${c} (${catCounts[c]})`;
+    btn.onclick = () => { currentFilter.category = currentFilter.category === c ? null : c; updateFilterUI(); renderPosts(); };
+    categoriesList.appendChild(btn);
+  });
+
+  // show active filter
+  $("filterActive").textContent = currentFilter.tag ? `Tag: ${currentFilter.tag}` : currentFilter.category ? `Category: ${currentFilter.category}` : "All";
+}
+
+/* Filter UI */
+function updateFilterUI(){
+  // highlight search and sort controls if needed
+}
+
+/* Editor actions */
+function resetEditor(){
+  currentEditId = null;
+  $("editorTitle").textContent = "Create New Post";
+  postTitle.value = "";
+  postContent.value = "";
+  postTags.value = "";
+  postCategory.value = "";
+  postImage.value = "";
+  previewArea.style.display = "none";
+}
+
+function loadPostIntoEditor(p){
+  currentEditId = p.id;
+  $("editorTitle").textContent = "Edit Post";
+  postTitle.value = p.title || "";
+  postContent.value = p.content || "";
+  postTags.value = (p.tags || []).join(", ");
+  postCategory.value = p.category || "";
+  previewArea.style.display = "none";
+}
+
+/* handle image file -> base64 */
+function fileToBase64(file){
+  return new Promise((resolve, reject) => {
+    if(!file) return resolve(null);
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (e) => reject(e);
+    reader.readAsDataURL(file);
+  });
+}
+
+/* Publish or save draft */
+publishBtn.addEventListener("click", async () => {
+  const title = postTitle.value.trim();
+  const content = postContent.value.trim();
+  if(!title || !content){ if(!confirm("Publish without title or content?")) return; }
+
+  const tags = postTags.value.split(",").map(s=>s.trim()).filter(Boolean);
+  const category = postCategory.value.trim();
+
+  // process image
+  const imgFile = postImage.files && postImage.files[0];
+  const imgBase = imgFile ? await fileToBase64(imgFile) : null;
+
+  if(currentEditId){
+    // update
+    const idx = posts.findIndex(p=>p.id===currentEditId);
+    if(idx>=0){
+      posts[idx] = {...posts[idx], title, content, tags, category, date: new Date().toISOString(), image: imgBase || posts[idx].image, draft:false};
+    }
+  } else {
+    const newPost = {
+      id: uid("post_"),
+      title, content, tags, category, image: imgBase, date: new Date().toISOString(), draft:false, comments:[], deleted:false
+    };
+    posts.unshift(newPost);
+  }
+  persist();
+  resetEditor();
+  renderPosts();
+});
+
+saveDraftBtn.addEventListener("click", async () => {
+  const title = postTitle.value.trim();
+  const content = postContent.value.trim();
+  const tags = postTags.value.split(",").map(s=>s.trim()).filter(Boolean);
+  const category = postCategory.value.trim();
+  const imgFile = postImage.files && postImage.files[0];
+  const imgBase = imgFile ? await fileToBase64(imgFile) : null;
+
+  if(currentEditId){
+    const idx = posts.findIndex(p=>p.id===currentEditId);
+    if(idx>=0){
+      posts[idx] = {...posts[idx], title, content, tags, category, date:new Date().toISOString(), draft:true, image: imgBase || posts[idx].image};
+    }
+  } else {
+    const newPost = { id: uid("post_"), title, content, tags, category, image: imgBase, date: new Date().toISOString(), draft:true, comments:[], deleted:false };
+    posts.unshift(newPost);
+  }
+  persist();
+  resetEditor();
+  renderPosts();
+});
+
+clearBtn.addEventListener("click", () => {
+  if(confirm("Clear editor? Unsaved changes will be lost.")) resetEditor();
+});
+
+/* postsList click delegation */
+postsList.addEventListener("click", (ev) => {
+  const btn = ev.target.closest("button");
+  if(!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  if(action === "view") openModal(id);
+  else if(action === "edit") {
+    const p = posts.find(x => x.id === id);
+    if(p) loadPostIntoEditor(p);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+  else if(action === "delete"){
+    if(!confirm("Delete this post? This cannot be undone.")) return;
+    const idx = posts.findIndex(x=>x.id===id);
+    if(idx>=0){ posts.splice(idx,1); persist(); renderPosts(); }
+  }
+});
+
+/* pagination */
+prevPageBtn.addEventListener("click", () => { if(currentPage>1){ currentPage--; renderPosts(); }});
+nextPageBtn.addEventListener("click", () => { currentPage++; renderPosts(); });
+
+/* search & sort */
+searchInput.addEventListener("input", (e) => {
+  currentFilter.search = e.target.value;
+  currentPage = 1;
+  renderPosts();
+});
+sortSelect.addEventListener("change", (e) => {
+  currentFilter.sort = e.target.value;
+  renderPosts();
+});
+
+/* preview toggle & md helpers */
+previewToggle.addEventListener("click", () => {
+  if(previewArea.style.display === "none") {
+    previewContent.innerHTML = renderMarkdown(postContent.value || "");
+    previewArea.style.display = "block";
+    previewToggle.textContent = "Hide Preview";
+  } else {
+    previewArea.style.display = "none";
+    previewToggle.textContent = "Toggle Preview";
+  }
+});
+
+$("mdBold").addEventListener("click", () => wrapSelectionWith("**"));
+$("mdItalic").addEventListener("click", () => wrapSelectionWith("*"));
+$("mdH1").addEventListener("click", () => insertAtCursor("# "));
+$("mdH2").addEventListener("click", () => insertAtCursor("## "));
+
+function wrapSelectionWith(wrapper){
+  const el = postContent;
+  const start = el.selectionStart, end = el.selectionEnd;
+  const val = el.value;
+  el.value = val.slice(0, start) + wrapper + val.slice(start, end) + wrapper + val.slice(end);
+  el.focus();
+  el.selectionStart = start + wrapper.length;
+  el.selectionEnd = end + wrapper.length;
+}
+function insertAtCursor(text){
+  const el = postContent;
+  const start = el.selectionStart, end = el.selectionEnd;
+  const val = el.value;
+  el.value = val.slice(0, start) + text + val.slice(end);
+  el.focus();
+  el.selectionStart = start + text.length;
+  el.selectionEnd = start + text.length;
+}
+
+/* modal functions (view post) */
+function openModal(id){
+  const p = posts.find(x=>x.id===id);
+  if(!p) return;
+  modalTitle.textContent = p.title || "(Untitled)";
+  modalMeta.textContent = `${new Date(p.date).toLocaleString()} • ${p.category || "Uncategorized"} • ${(p.tags||[]).join(", ")}`;
+  modalContent.innerHTML = renderMarkdown(p.content || "");
+  modalImage.innerHTML = p.image ? `<img src="${p.image}" alt="feature image" style="max-width:100%;border-radius:8px">` : "";
+  // comments
+  renderComments(p);
+  modal.dataset.postId = p.id;
+  modal.style.display = "flex";
+  window.scrollTo({top:0});
+}
+
+modalClose.addEventListener("click", () => { modal.style.display = "none"; });
+modal.addEventListener("click", (e) => { if(e.target === modal) modal.style.display = "none"; });
+
+modalEdit.addEventListener("click", () => {
+  const id = modal.dataset.postId;
+  const p = posts.find(x=>x.id===id);
+  if(p){
+    loadPostIntoEditor(p);
+    modal.style.display = "none";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+});
+
+/* comments */
+function renderComments(post){
+  commentsList.innerHTML = "";
+  (post.comments || []).forEach(c => {
+    const el = document.createElement("div");
+    el.className = "comment";
+    el.innerHTML = `<div style="font-weight:600">${escapeHtml(c.name || "Anonymous")} <span style="font-size:12px;color:var(--muted);font-weight:400">• ${new Date(c.date).toLocaleString()}</span></div>
+                    <div style="margin-top:6px">${escapeHtml(c.text)}</div>`;
+    commentsList.appendChild(el);
+  });
+}
+
+addCommentBtn.addEventListener("click", () => {
+  const id = modal.dataset.postId;
+  const post = posts.find(x=>x.id===id);
+  if(!post) return alert("Post not found");
+  const name = commentAuthor.value.trim() || "Anonymous";
+  const email = commentEmail.value.trim();
+  const text = commentText.value.trim();
+  if(!text) return alert("Please write a comment");
+  const comment = {id:uid("c_"), name, email, text, date:new Date().toISOString()};
+  post.comments = post.comments || [];
+  post.comments.push(comment);
+  persist();
+  renderComments(post);
+  commentAuthor.value = ""; commentEmail.value = ""; commentText.value = "";
+});
+
+/* admin login (very basic for demo) */
+loginBtn.addEventListener("click", () => {
+  const pass = adminPass.value.trim();
+  if(!pass) return alert("Enter a password to login as admin");
+  if(!admin.pass){
+    // first-time set password
+    if(!confirm("No admin password set. Set this as admin password?")) return;
+    admin.pass = pass;
+    admin.logged = true;
+    saveToLS(LS_ADMIN, admin);
+    adminStatus.textContent = "Admin registered & logged in";
+  } else {
+    if(pass === admin.pass){ admin.logged = true; adminStatus.textContent = "Admin logged in"; saveToLS(LS_ADMIN, admin); }
+    else adminStatus.textContent = "Wrong password";
+  }
+});
+
+/* admin button toggles admin view (for demo) */
+adminBtn.addEventListener("click", () => {
+  const a = loadFromLS(LS_ADMIN, {logged:false});
+  if(a.logged) {
+    if(confirm("Log out admin?")) { a.logged = false; saveToLS(LS_ADMIN, a); adminStatus.textContent = "Logged out"; }
+  } else {
+    alert("Use the Admin form in sidebar to log in (demo only).");
+  }
+});
+
+/* export / import */
+exportBtn.addEventListener("click", () => {
+  const dataStr = JSON.stringify(posts, null, 2);
+  const blob = new Blob([dataStr], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `miniBlogger-export-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+importBtn.addEventListener("click", () => importFile.click());
+importFile.addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const imported = JSON.parse(reader.result);
+      if(!Array.isArray(imported)) return alert("Invalid file");
+      // merge intelligently: avoid id collisions
+      imported.forEach(item => {
+        item.id = item.id || uid("post_");
+        posts.unshift(item);
+      });
+      persist();
+      renderPosts();
+      alert("Import complete");
+    } catch(err){ alert("Failed to import: " + err.message); }
+  };
+  reader.readAsText(f);
+});
+
+/* clear all data */
+clearAllBtn.addEventListener("click", () => {
+  if(confirm("This will remove all posts and comments from localStorage. Continue?")){
+    posts = [];
+    persist();
+    renderPosts();
+    alert("All data cleared");
+  }
+});
+
+/* Page Navigation */
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+  
+  // Show selected page
+  $(pageId + '-page').classList.add('active');
+  
+  // Update navigation links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+    if (link.dataset.page === pageId) {
+      link.classList.add('active');
+    }
+  });
+  
+  // Update stats on about page
+  if (pageId === 'about') {
+    updateAboutStats();
+  }
+}
+
+// Add event listeners for navigation
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    showPage(link.dataset.page);
+  });
+});
+
+/* Update About Page Stats */
+function updateAboutStats() {
+  const publishedPosts = posts.filter(p => !p.draft && !p.deleted).length;
+  const totalCommentCount = posts.reduce((count, post) => count + (post.comments ? post.comments.length : 0), 0);
+  
+  // Get unique tags
+  const allTags = new Set();
+  posts.forEach(p => {
+    (p.tags || []).forEach(tag => allTags.add(tag));
+  });
+  
+  totalPosts.textContent = publishedPosts;
+  totalComments.textContent = totalCommentCount;
+  totalTags.textContent = allTags.size;
+}
+
+/* Contact Form */
+sendMessageBtn.addEventListener('click', () => {
+  const name = contactName.value.trim();
+  const email = contactEmail.value.trim();
+  const subject = contactSubject.value.trim();
+  const message = contactMessage.value.trim();
+  
+  if (!name || !email || !subject || !message) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  const contact = {
+    id: uid('contact_'),
+    name,
+    email,
+    subject,
+    message,
+    date: new Date().toISOString()
+  };
+  
+  contacts.push(contact);
+  saveToLS(LS_CONTACTS, contacts);
+  
+  alert('Thank you for your message! We\'ll get back to you soon.');
+  
+  // Clear form
+  contactName.value = '';
+  contactEmail.value = '';
+  contactSubject.value = '';
+  contactMessage.value = '';
+});
+
+/* Dark/Light Mode Toggle */
+themeToggle.addEventListener('click', () => {
+  const isDark = document.body.classList.toggle('dark-mode');
+  themeToggle.textContent = isDark ? '☀️' : '🌙';
+  saveToLS('miniBlogger.theme', isDark ? 'dark' : 'light');
+});
+
+// Load saved theme
+const savedTheme = localStorage.getItem('miniBlogger.theme');
+if (savedTheme === 'dark') {
+  document.body.classList.add('dark-mode');
+  themeToggle.textContent = '☀️';
+}
+
+/* helper on load */
+function init(){
+  // seed with a sample post if none present
+  if(posts.length === 0){
+    posts = [{
+      id: uid("post_"),
+      title: "Welcome to Mini Blogger",
+      content: "This is a demo post. Use the editor above to create posts. **Supports** *basic* formatting and image upload.\n\n- Simple markdown\n- Comments\n- Export & import\n\n[Learn more](https://example.com)",
+      tags:["demo","welcome"],
+      category:"General",
+      date: new Date().toISOString(),
+      image: null,
+      comments: [
+        {
+          id: uid("c_"),
+          name: "Admin",
+          email: "admin@example.com",
+          text: "Welcome to our blogging platform!",
+          date: new Date().toISOString()
+        }
+      ]
+    }];
+    persist();
+  }
+  renderPosts();
+
+  // show admin logged state if present
+  const a = loadFromLS(LS_ADMIN, {logged:false});
+  if(a.logged) adminStatus.textContent = "Admin logged in"; else adminStatus.textContent = "Not logged in";
+
+  // attach keyboard shortcut: Ctrl+Enter to publish
+  postContent.addEventListener("keydown", (e) => {
+    if(e.ctrlKey && e.key === "Enter") publishBtn.click();
+  });
+}
+
+init();
+
+</script>
+
+</body>
+</html>
